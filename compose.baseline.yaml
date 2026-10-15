@@ -1,0 +1,11 @@
+# Diagnostic baseline only: unmodified Developer binaries with Python inspection dependencies.
+services:
+  onlyoffice:
+    image: hr-office-patch-deps-amd64
+    platform: linux/amd64
+    volumes:
+      - office_baseline_data:/var/www/onlyoffice/Data
+      - office_baseline_logs:/var/log/onlyoffice
+volumes:
+  office_baseline_data:
+  office_baseline_logs:

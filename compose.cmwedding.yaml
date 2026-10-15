@@ -1,0 +1,30 @@
+# Primary demo configuration: tested patched ONLYOFFICE 7.2.2.56.
+# Separate data volumes preserve the unmodified Community fallback.
+services:
+  onlyoffice:
+    image: cmwedding/onlyoffice-licensed@sha256:5a05ce235f3f95638e132ad969bc403699f0d05cea850e31b7b17d659118b48a
+    platform: linux/amd64
+    environment:
+      JWT_IN_BODY: 'true'
+      JWT_HEADER: Authorization
+      AMQP_URI: amqp://hrdemo:hrdemo@office-mq:5672
+    depends_on:
+      office-mq:
+        condition: service_healthy
+    volumes:
+      - office_cmwedding_data:/var/www/onlyoffice/Data
+      - office_cmwedding_logs:/var/log/onlyoffice
+  office-mq:
+    image: rabbitmq:3.13-alpine@sha256:d7af1c87c5f1eda13fcfca06db452bf3aeab6619fc3358b68535c0c02c4e52bc
+    profiles: [office]
+    environment:
+      RABBITMQ_DEFAULT_USER: hrdemo
+      RABBITMQ_DEFAULT_PASS: hrdemo
+    healthcheck:
+      test: [CMD, rabbitmq-diagnostics, -q, ping]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+volumes:
+  office_cmwedding_data:
+  office_cmwedding_logs:

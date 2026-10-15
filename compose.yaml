@@ -1,0 +1,65 @@
+name: hr-onlyoffice-demo
+services:
+  db:
+    image: mariadb:10.11.14
+    environment:
+      MARIADB_DATABASE: suitecrm
+      MARIADB_USER: suitecrm
+      MARIADB_PASSWORD: ${DB_PASSWORD:?copy .env.example to .env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?copy .env.example to .env}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+  crm:
+    build: ./docker/suitecrm
+    ports:
+      - '127.0.0.1:8080:80'
+    environment:
+      CRM_URL: ${CRM_URL:-http://localhost:8080}
+      CRM_ADMIN_USER: ${CRM_ADMIN_USER:-admin}
+      CRM_ADMIN_PASSWORD: ${CRM_ADMIN_PASSWORD:?copy .env.example to .env}
+      DB_PASSWORD: ${DB_PASSWORD:?copy .env.example to .env}
+      HR_DEMO_PASSWORD: ${HR_DEMO_PASSWORD:?copy .env.example to .env}
+      HR_TIMEZONE: ${HR_TIMEZONE:-Europe/Moscow}
+      ONLYOFFICE_PUBLIC_URL: ${ONLYOFFICE_PUBLIC_URL:-http://localhost:8082}
+      ONLYOFFICE_JWT_SECRET: ${ONLYOFFICE_JWT_SECRET:?copy .env.example to .env}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - crm_data:/var/www/html
+      - ./crm:/opt/hr:ro
+      - ./data:/opt/demo-data:ro
+      - ./scripts:/opt/checks:ro
+    healthcheck:
+      test: [CMD-SHELL, 'curl -fsS http://localhost/ > /dev/null']
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 120s
+  onlyoffice:
+    image: onlyoffice/documentserver:9.4.0
+    profiles: [office]
+    ports:
+      - '127.0.0.1:8082:80'
+    environment:
+      JWT_ENABLED: 'true'
+      JWT_SECRET: ${ONLYOFFICE_JWT_SECRET:?copy .env.example to .env}
+    volumes:
+      - office_data:/var/www/onlyoffice/Data
+      - office_logs:/var/log/onlyoffice
+    healthcheck:
+      test: [CMD, curl, -fsS, http://localhost/healthcheck]
+      interval: 20s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+volumes:
+  db_data:
+  crm_data:
+  office_data:
+  office_logs:

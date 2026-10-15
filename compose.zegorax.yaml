@@ -1,0 +1,11 @@
+services:
+  onlyoffice:
+    image: hr-onlyoffice-zegorax:6.3.1.32
+    platform: linux/amd64
+    build: ./docker/onlyoffice-zegorax
+    volumes:
+      - office_zegorax_data:/var/www/onlyoffice/Data
+      - office_zegorax_logs:/var/log/onlyoffice
+volumes:
+  office_zegorax_data:
+  office_zegorax_logs:

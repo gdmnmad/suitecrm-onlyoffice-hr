@@ -1,0 +1,22 @@
+# Use only on the dedicated demo server.
+services:
+  crm:
+    environment:
+      HR_ALLOW_PROXY_SESSIONS: 'true'
+      HR_EDITOR_PASSWORD: ${HR_EDITOR_PASSWORD:?required}
+      HR_VIEWER_PASSWORD: ${HR_VIEWER_PASSWORD:?required}
+    ports: !override
+      - '8080:80'
+    restart: unless-stopped
+  onlyoffice:
+    environment:
+      AMQP_URI: amqp://hrdemo:${RABBITMQ_PASSWORD:?required}@office-mq:5672
+    ports: !override
+      - '8082:80'
+    restart: unless-stopped
+  db:
+    restart: unless-stopped
+  office-mq:
+    environment:
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?required}
+    restart: unless-stopped

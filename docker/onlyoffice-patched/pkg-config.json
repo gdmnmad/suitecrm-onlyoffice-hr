@@ -1,0 +1,15 @@
+{
+  "pkg": {
+    "scripts": [
+      "./sources/*.js",
+      "./sources/**/*.js",
+      "../Common/sources/*.js",
+      "../DocService/sources/*.js",
+      "../FileConverter/sources/*.js"
+    ],
+    "assets": [
+      "./config/*.json",
+      "../Common/config/*.json"
+    ]
+  }
+}
